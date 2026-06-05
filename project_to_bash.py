@@ -23,7 +23,7 @@ def is_text_file(filepath: Path) -> bool:
     except UnicodeDecodeError:
         return False
 
-def generate_bundle(source_dir: str, output_file: str, extra_ignores: list):
+def generate_bundle(source_dir: str, output_file: str, extra_ignores: list, include_env: bool):
     source_path = Path(source_dir).resolve()
     out_path = Path(output_file).resolve()
     
@@ -43,6 +43,11 @@ def generate_bundle(source_dir: str, output_file: str, extra_ignores: list):
         
         for file in files:
             filepath = Path(root) / file
+            
+            # Security: Ignore .env files unless explicitly requested
+            # This covers .env, .env.local, .env.production, etc.
+            if not include_env and file.startswith('.env'):
+                continue
             
             # Ignore the generated script itself and this tool
             if filepath == out_path or file == Path(__file__).name:
@@ -85,12 +90,16 @@ def generate_bundle(source_dir: str, output_file: str, extra_ignores: list):
         out.write("echo '📝 Writing files...'\n\n")
         for rel_path, content in file_contents:
             out.write(f"echo '  -> {rel_path}'\n")
-            # Use cat << 'EOF' (single quotes prevent bash variable evaluation inside the code)
-            out.write(f"cat << 'EOF' > \"{rel_path}\"\n")
+            
+            # Using a highly unique delimiter to prevent collision with source code EOFs
+            eof_marker = "EOF_PAPERFLAKE_BUNDLER"
+            out.write(f"cat << '{eof_marker}' > \"{rel_path}\"\n")
             out.write(content)
+            
+            # Ensure the file ends with a newline before the closing marker
             if not content.endswith('\n'):
                 out.write('\n')
-            out.write("EOF\n\n")
+            out.write(f"{eof_marker}\n\n")
             
         out.write("echo '✅ Done! Project has been extracted.'\n")
 
@@ -107,4 +116,25 @@ if __name__ == "__main__":
         help="Directory to bundle (default: current directory '.')"
     )
     
-    parser
+    parser.add_argument(
+        "-o", "--output", 
+        default="bundle.sh", 
+        help="Output filename (default: bundle.sh)"
+    )
+    
+    parser.add_argument(
+        "-i", "--ignore", 
+        nargs="+", 
+        default=[], 
+        help="Additional directories to ignore (e.g., -i data assets temp)"
+    )
+    
+    parser.add_argument(
+        "--include-env", 
+        action="store_true", 
+        help="Include .env files (they are ignored by default to prevent leaking secrets)"
+    )
+
+    args = parser.parse_args()
+    
+    generate_bundle(args.directory, args.output, args.ignore, args.include_env)

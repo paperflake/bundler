@@ -29,14 +29,11 @@ python project2bash.py -i data assets
 
 # Include .env files (ignored by default to prevent leaking secrets)
 python project2bash.py --include-env
+```
+# How to extract
 
-How to extract
-
-To reconstruct the project on the target machine, simply run the generated script:
-Bash
-
-bash bundle.sh
-# Or make it executable: chmod +x bundle.sh && ./bundle.sh
+To reconstruct the project on the target machine, simply run the generated script: bash bundle.sh
+Or make it executable: chmod +x bundle.sh && ./bundle.sh
 
 Defaults
 

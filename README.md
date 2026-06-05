@@ -9,6 +9,9 @@ Instead of dealing with `.zip` files, extraction tools, or binary data when shar
 - **Easy Distribution:** Distribute Docker setups, microservices, or configs via a single copy-pasteable script.
 - **Safe Extraction:** Automatically detects and skips binary files (images, compiled code, etc.). It also uses a collision-proof `EOF` marker, ensuring the resulting bash script never breaks from encoding errors or internal bash variables.
 
+## 🤖 Adding this skill to your AI Agent
+There's and included `skills.md` file in this repository. To teach your AI how to use this tool autonomously, make the project2bash.py available for the AI agent and copy and paste the contents of `skills.md` into your agent's **system prompt**, **custom instructions**, or **tool registry**. *(Works perfectly with frameworks like Cline, Cursor, Aider, or custom API setups).*
+
 ## Requirements
 - Python 3.x
 - A bash environment to run the output (Native on Linux/macOS. On Windows, use Git Bash or WSL).
